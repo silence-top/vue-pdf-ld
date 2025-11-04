@@ -1,24 +1,22 @@
 <style src="./annotationLayer.css"></style>
 <script>
+    import componentFactory from './componentFactory.js'
 
-	import componentFactory from './componentFactory.js'
+    let component;
 
-	if ( process.env.VUE_ENV !== 'server' ) {
+    if (process.env.VUE_ENV !== 'server') {
+        const pdfjsWrapper = require('./pdfjsWrapper.js').default;
+        const PDFJS = require('pdfjs-dist/legacy/build/pdf.js');
+        const PdfjsWorker = require('pdfjs-dist/legacy/build/pdf.worker.entry');
 
-		var pdfjsWrapper = require('./pdfjsWrapper.js').default;
-		var PDFJS = require('pdfjs-dist/es5/build/pdf.js');
+        PDFJS.GlobalWorkerOptions.workerSrc = PdfjsWorker;
+        PDFJS.GlobalWorkerOptions.isEvalSupported = false; // 禁用 eval，防止漏洞
 
-		if ( typeof window !== 'undefined' && 'Worker' in window && navigator.appVersion.indexOf('MSIE 10') === -1 ) {
+        component = componentFactory(pdfjsWrapper(PDFJS));
+        component.PDFJS = PDFJS;
+    } else {
+        component = componentFactory({});
+    }
 
-			var PdfjsWorker = require('worker-loader!pdfjs-dist/es5/build/pdf.worker.js');
-			PDFJS.GlobalWorkerOptions.workerPort = new PdfjsWorker();
-		}
-
-		var component = componentFactory(pdfjsWrapper(PDFJS));
-	} else {
-
-		var component = componentFactory({});
-	}
-
-	export default component;
+    export default component;
 </script>

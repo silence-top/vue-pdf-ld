@@ -1,17 +1,22 @@
 <style src="./annotationLayer.css"></style>
 <script>
+    import componentFactory from './componentFactory.js'
 
-	import componentFactory from './componentFactory.js'
+    let component;
 
-	if ( process.env.VUE_ENV !== 'server' ) {
+    if (process.env.VUE_ENV !== 'server') {
+        const pdfjsWrapper = require('./pdfjsWrapper.js').default;
+        const PDFJS = require('pdfjs-dist/legacy/build/pdf.js');
+        const PdfjsWorker = require('pdfjs-dist/legacy/build/pdf.worker.entry');
 
-		var pdfjsWrapper = require('./pdfjsWrapper.js').default;
-		var PDFJS = require('pdfjs-dist/es5/build/pdf.js');
-		var component = componentFactory(pdfjsWrapper(PDFJS));
-	} else {
+        PDFJS.GlobalWorkerOptions.workerSrc = PdfjsWorker;
+        PDFJS.GlobalWorkerOptions.isEvalSupported = false; // 可选：禁用 eval 增强安全性
 
-		var component = componentFactory({});
-	}
+        component = componentFactory(pdfjsWrapper(PDFJS));
+        component.PDFJS = PDFJS;
+    } else {
+        component = componentFactory({});
+    }
 
-	export default component;
+    export default component;
 </script>
